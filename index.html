@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/earlyaccess/notosanskr.css">
-    <title>CCTV Detact Circle Pose </title>
+    <title>POLORO CCTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="loadingstyle.css">
 </head>
@@ -64,7 +64,16 @@
 
         // the link to your model provided by Teachable Machine export panel
         const URL = "./";
-
+        const API_HOST='141.223.140.53:9666';
+        const API_URL='cars/';
+        const Index=0
+        const desPoint='X';
+        const postData={
+                        "index":Index,
+                        "status":true,
+                        "destPoint":desPoint,
+                        "prePoint":null
+                    }
         let model, webcam, ctx, labelContainer, maxPredictions;
 
         async function init() {
@@ -124,6 +133,9 @@
             if (prediction[0].probability.toFixed(2) == 1.00) {
                 if (status == "circle_pose") {
                     count = count + 1  // 카운트한거 볼 수 있으면 좋겠다. 몇 개 이상일 때 소리가 났으면 좋겠다.
+                //    if(count>1){
+                //         sendPost(API_HOST+"/"+API_URL+"0",postData)
+                //    }
                     if (count % 1 == 0 && count != 0) { //1번 마다 소리나기
                         var audio = new Audio('alertsound.mp3');
                         audio.play();
@@ -136,8 +148,12 @@
                     $('#counter').html(count);
                 }
                 status = "state"
-            } else if (prediction[1].probability.toFixed(2) == 1.00) {
+            } 
+            else if (prediction[1].probability.toFixed(2) == 1.00) {
                 status = "circle_pose"
+                if(count>1){
+                    sendPost(API_HOST+"/"+API_URL+"0",postData)
+                }
             }
 
             for (let i = 0; i < maxPredictions; i++) {
@@ -149,6 +165,23 @@
 
             // finally draw the poses
             drawPose(pose);
+        }
+
+        function sendPost(url,params){
+            console.log(url)
+            var form=document.createElement('form');
+            form.setAttribute('method','post');
+            form.setAttribute('action',url);
+            document.charset='utf-8';
+            for(var key in params){
+                var hiddenField=document.createElement('input');
+                hiddenField.setAttribute('type','hidden');
+                hiddenField.setAttribute('name',key);
+                hiddenField.setAttribute('value',params[key]);
+                form.appendChild(hiddenField)
+            }
+            document.body.appendChild(form);
+            form.submit();
         }
 
         function drawPose(pose) {
@@ -165,5 +198,5 @@
     </script>
 
 </body>
-
+        
 </html>
