@@ -33,7 +33,7 @@
                 </div>
             </div>
         </div>
-        <h1>Detact Circle Pose</h1>
+        <h1>POLORO CCTV</h1>
         <button class="btn btn-primary" type="button" onclick="init()">
             <script>
                 alert('Start 버튼을 누르면 캠이 작동됩니다.');
@@ -64,15 +64,15 @@
 
         // the link to your model provided by Teachable Machine export panel
         const URL = "./";
-        const API_HOST='141.223.140.53:9666';
+        const API_HOST='http://141.223.140.53:9666';
         const API_URL='cars/';
         const Index=0
         const desPoint='X';
         const postData={
                         "index":Index,
-                        "status":true,
+                        "status":"True",
                         "destPoint":desPoint,
-                        "prePoint":null
+                        "prePoint":"none"
                     }
         let model, webcam, ctx, labelContainer, maxPredictions;
 
@@ -93,10 +93,8 @@
             model = await tmPose.load(modelURL, metadataURL);
             maxPredictions = model.getTotalClasses();
 
-            // Convenience function to setup a webcam   캠 크기랑 위치 좀 수정하면 괜찮겠다.
-            // 캠 끄는 버튼도 있으면 좋겠다.
             const size = 500;
-            const flip = true; // whether to flip the webcam
+            const flip = true; 
             webcam = new tmPose.Webcam(size, size, flip); // width, height, flip
             await webcam.setup(); // request access to the webcam
             $('#loadingdiv').hide();
@@ -124,23 +122,15 @@
         var count = 0
 
         async function predict() {
-            // Prediction #1: run input through posenet
-            // estimatePose can take in an image, video or canvas html element
             const { pose, posenetOutput } = await model.estimatePose(webcam.canvas);
-            // Prediction 2: run input through teachable machine classification model
             const prediction = await model.predict(posenetOutput);
 
             if (prediction[0].probability.toFixed(2) == 1.00) {
                 if (status == "circle_pose") {
-                    count = count + 1  // 카운트한거 볼 수 있으면 좋겠다. 몇 개 이상일 때 소리가 났으면 좋겠다.
-                //    if(count>1){
-                //         sendPost(API_HOST+"/"+API_URL+"0",postData)
-                //    }
-                    if (count % 1 == 0 && count != 0) { //1번 마다 소리나기
-                        var audio = new Audio('alertsound.mp3');
-                        audio.play();
-                    }
-
+                    count = count + 1 
+                   if(count>1){
+                        sendPost(API_HOST+"/"+API_URL+"0",postData)
+                   }
                     if (progress <= 0) {
                         progress = 327 - 32.7
                     }
@@ -151,9 +141,9 @@
             } 
             else if (prediction[1].probability.toFixed(2) == 1.00) {
                 status = "circle_pose"
-                if(count>1){
-                    sendPost(API_HOST+"/"+API_URL+"0",postData)
-                }
+                // if(count>1){
+                //     // sendPost(API_HOST+"/"+API_URL+"0",postData)
+                // }
             }
 
             for (let i = 0; i < maxPredictions; i++) {
@@ -168,21 +158,29 @@
         }
 
         function sendPost(url,params){
-            console.log(url)
-            var form=document.createElement('form');
-            form.setAttribute('method','post');
-            form.setAttribute('action',url);
-            document.charset='utf-8';
-            for(var key in params){
-                var hiddenField=document.createElement('input');
-                hiddenField.setAttribute('type','hidden');
-                hiddenField.setAttribute('name',key);
-                hiddenField.setAttribute('value',params[key]);
-                form.appendChild(hiddenField)
+            // console.log(url)
+            // var form=document.createElement('form');
+            // form.setAttribute('method','post');
+            // form.setAttribute('action',url);
+            // document.charset='utf-8';
+            // for(var key in params){
+            //     var hiddenField=document.createElement('input');
+            //     hiddenField.setAttribute('type','hidden');
+            //     hiddenField.setAttribute('name',key);
+            //     hiddenField.setAttribute('value',params[key]);
+            //     form.appendChild(hiddenField)
+            // }
+            // document.body.appendChild(form);
+            // form.submit();
+
+            fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(params),
+            }).then((response) => console.log(response));
             }
-            document.body.appendChild(form);
-            form.submit();
-        }
 
         function drawPose(pose) {
             if (webcam.canvas) {
